@@ -68,12 +68,6 @@ const typeDefs = `#graphql
     count: Int
   }
 
-  type RandomDie {
-    numSides: Int!
-    rollOnce: Int!
-    roll(numRolls: Int!): [Int]
-  }
-
   scalar Url
   scalar Date
 
@@ -88,7 +82,7 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
-    createTweet(body: String): Tweet
+    createTweet(body: String, author_id: ID!): Tweet
     deleteTweet(id: ID!): Tweet
     markTweetRead(id: ID!): Boolean
   }
@@ -103,21 +97,16 @@ const batchUsersById = async (ids) => {
 // Create a DataLoader instance for batch loading users by ID
 const userLoader = new DataLoader(batchUsersById);
 
-// Resolver map
 const resolvers = {
   Query: {
     Tweets: () => tweets,
     Tweet: (_, { id }) => tweets.find((tweet) => tweet.id == id),
   },
-  //   Tweet: {
-  //     id: (tweet) => tweet.id,
-  //     body: (tweet) => tweet.body,
-  //   },
   Tweet: {
     Author: (tweet, _, context) => {
-      console.log(`context.dataloaders is ${context.dataloaders}`);
-      //   return authors.find((author) => author.id == tweet.author_id);
-      return userLoader.load(tweet.author_id);
+      //   console.log(`context.dataloaders is ${context.dataloaders}`);
+      return authors.find((author) => author.id == tweet.author_id);
+      //   return userLoader.load(tweet.author_id);
     },
     Stats: (tweet) => stats.find((stat) => stat.tweet_id == tweet.id),
   },
@@ -125,7 +114,7 @@ const resolvers = {
     full_name: (author) => `${author.first_name} ${author.last_name}`,
   },
   Mutation: {
-    createTweet: (_, { body }) => {
+    createTweet: (_, { body, author_id }) => {
       const nextTweetId =
         tweets.reduce((id, tweet) => {
           return Math.max(id, tweet.id);
@@ -133,7 +122,7 @@ const resolvers = {
       const newTweet = {
         id: nextTweetId,
         date: new Date(),
-        author_id: currentUserId, // <= you'll have to deal with that
+        author_id,
         body,
       };
       tweets.push(newTweet);
