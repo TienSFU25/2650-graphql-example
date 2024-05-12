@@ -1,6 +1,7 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
-import DataLoader from "dataloader";
+
+// example derived from https://marmelab.com/blog/2017/09/06/dive-into-graphql-part-iii-building-a-graphql-server-with-nodejs.html
 
 const tweets = [
   { id: 1, body: "Lorem Ipsum", date: new Date(), author_id: 10 },
@@ -22,23 +23,14 @@ const authors = [
     avatar_url: "acme.com/avatars/11",
   },
 ];
-const stats = [
-  { tweet_id: 1, views: 123, likes: 4, retweets: 1, responses: 0 },
-  { tweet_id: 2, views: 567, likes: 45, retweets: 63, responses: 6 },
-];
 
 // Schema definition
 const typeDefs = `#graphql
   type Tweet {
     id: ID!
-    # The tweet text. No more than 140 characters!
     body: String
-    # When the tweet was published
     date: Date
-    # Who published the tweet
     Author: User
-    # Views, retweets, likes, etc
-    Stats: Stat
   }
 
   type User {
@@ -51,33 +43,13 @@ const typeDefs = `#graphql
     avatar_url: Url
   }
 
-  type Stat {
-    views: Int
-    likes: Int
-    retweets: Int
-    responses: Int
-  }
-
-  type Notification {
-    id: ID
-    date: Date
-    type: String
-  }
-
-  type Meta {
-    count: Int
-  }
-
   scalar Url
   scalar Date
 
   type Query {
     Tweet(id: ID!): Tweet
     Tweets(limit: Int, sortField: String, sortOrder: String): [Tweet]
-    TweetsMeta: Meta
     User: User
-    Notifications(limit: Int): [Notification]
-    NotificationsMeta: Meta
   }
 
   type Mutation {
@@ -87,15 +59,6 @@ const typeDefs = `#graphql
   }
 `;
 
-// Simulated asynchronous function to fetch user data by ID
-const batchUsersById = async (ids) => {
-  console.log("Fetching users by IDs:", ids);
-  return ids.map((id) => authors.find((user) => user.id === id));
-};
-
-// Create a DataLoader instance for batch loading users by ID
-const userLoader = new DataLoader(batchUsersById);
-
 const resolvers = {
   Query: {
     Tweets: () => tweets,
@@ -103,11 +66,9 @@ const resolvers = {
   },
   Tweet: {
     Author: (tweet, _, context) => {
-      //   console.log(`context.dataloaders is ${context.dataloaders}`);
+      console.log(`loading author!`);
       return authors.find((author) => author.id == tweet.author_id);
-      //   return userLoader.load(tweet.author_id);
     },
-    Stats: (tweet) => stats.find((stat) => stat.tweet_id == tweet.id),
   },
   User: {
     full_name: (author) => `${author.first_name} ${author.last_name}`,
