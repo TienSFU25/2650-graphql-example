@@ -72,7 +72,6 @@ const typeDefs = `#graphql
   scalar Date
 
   type Query {
-    getDie(numSides: Int): RandomDie
     Tweet(id: ID!): Tweet
     Tweets(limit: Int, sortField: String, sortOrder: String): [Tweet]
     TweetsMeta: Meta
