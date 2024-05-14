@@ -12,7 +12,7 @@ import {
 const client = new ApolloClient({
   // Connect to your GraphQL server here; update the URI as needed
   link: new HttpLink({
-    uri: "http://localhost:4000/graphql",
+    uri: "http://localhost:3000/graphql",
   }),
   cache: new InMemoryCache(),
 });

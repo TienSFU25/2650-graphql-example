@@ -1,5 +1,7 @@
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
+import { expressMiddleware } from "@apollo/server/express4";
+import express from "express";
+import cors from "cors";
 
 const typeDefs = `#graphql
     type Query {
@@ -13,12 +15,26 @@ const resolvers = {
   },
 };
 
+const app = express();
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
 });
 
-// Launch the server
-const { url } = await startStandaloneServer(server);
+await server.start();
 
-console.log(`🚀 Server listening at: ${url}`);
+// Launch the server
+app.use(
+  "/",
+  cors(),
+  express.json(),
+  // expressMiddleware accepts the same arguments:
+  // an Apollo Server instance and optional configuration options
+  expressMiddleware(server, {})
+);
+
+const port = process.env.PORT || 4000;
+app.listen(port, () => {
+  console.log(`Server started at http://localhost:${port}`);
+});
