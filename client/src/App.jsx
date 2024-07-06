@@ -10,9 +10,6 @@ const GetTweets = gql`
         username
         full_name
       }
-      Stats {
-        views
-      }
     }
   }
 `;
