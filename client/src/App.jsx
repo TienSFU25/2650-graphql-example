@@ -19,9 +19,14 @@ const GetTweets = gql`
 
 function Home(props) {
   const client = useApolloClient();
-  const { id } = useParams();
+  // const { id } = useParams();
+  // const [timestamp, setTimestamp] = useState(Date.now());
+  // const timestamp = useState(Date.now());
+  const timeStamp = Date.now();
+  console.log(`fetching at ${timeStamp} `);
+
   const [tweets, setTweets] = useState([]);
-  console.log(`LOADING APP ID ${id}, props ${JSON.stringify(props)}`);
+  // console.log(`LOADING APP ID ${id}, props ${JSON.stringify(props)}`);
   const navigate = useNavigate();
 
   // const { loading, error, data, refetch } = useQuery(GetTweets, {
@@ -48,7 +53,7 @@ function Home(props) {
       setTweets(data.Tweets);
     }
     fetchData();
-  }, [id]);
+  }, [timeStamp]);
 
   // async function fetchData() {
   //   console.log(`refetching stuff`);
@@ -61,8 +66,8 @@ function Home(props) {
   // fetchData();
 
   const refresh = () => {
-    // navigate("/");
-    navigate(`/yay/${id ? parseInt(id) + 1 : 1}`);
+    navigate("/");
+    // navigate(`/${id ? parseInt(id) + 1 : 1}`);
   };
 
   return (
@@ -80,7 +85,7 @@ function App() {
         <Routes>
           <Route index element={<Home />} />
           <Route path="/" element={<Home />} />
-          <Route path="/yay/:id" element={<Home />} />
+          <Route path="/:id" element={<Home />} />
         </Routes>
       </BrowserRouter>
     </div>
